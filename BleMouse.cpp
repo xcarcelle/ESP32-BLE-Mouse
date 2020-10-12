@@ -20,48 +20,47 @@
 #endif
 
 static const uint8_t _hidReportDescriptor[] = {
-  USAGE_PAGE(1),       0x01, // USAGE_PAGE (Generic Desktop)
-  USAGE(1),            0x02, // USAGE (Mouse)
-  COLLECTION(1),       0x01, // COLLECTION (Application)
-  USAGE(1),            0x01, //   USAGE (Pointer)
-  COLLECTION(1),       0x00, //   COLLECTION (Physical)
-  REPORT_ID(1),        0x01, //     REPORT_ID (1)
-  // ------------------------------------------------- Buttons (Left, Right, Middle, Back, Forward)
-  USAGE_PAGE(1),       0x09, //     USAGE_PAGE (Button)
-  USAGE_MINIMUM(1),    0x01, //     USAGE_MINIMUM (Button 1)
-  USAGE_MAXIMUM(1),    0x05, //     USAGE_MAXIMUM (Button 5)
-  LOGICAL_MINIMUM(1),  0x00, //     LOGICAL_MINIMUM (0)
-  LOGICAL_MAXIMUM(1),  0x01, //     LOGICAL_MAXIMUM (1)
-  REPORT_SIZE(1),      0x01, //     REPORT_SIZE (1)
-  REPORT_COUNT(1),     0x05, //     REPORT_COUNT (5)
-  HIDINPUT(1),         0x02, //     INPUT (Data, Variable, Absolute) ;5 button bits
-  // ------------------------------------------------- Padding
-  REPORT_SIZE(1),      0x03, //     REPORT_SIZE (3)
-  REPORT_COUNT(1),     0x01, //     REPORT_COUNT (1)
-  HIDINPUT(1),         0x03, //     INPUT (Constant, Variable, Absolute) ;3 bit padding
-  // ------------------------------------------------- X/Y position, Wheel
-  USAGE_PAGE(1),       0x01, //     USAGE_PAGE (Generic Desktop)
-  USAGE(1),            0x30, //     USAGE (X)
-  USAGE(1),            0x31, //     USAGE (Y)
-  USAGE(1),            0x38, //     USAGE (Wheel)
-  LOGICAL_MINIMUM(1),  0x81, //     LOGICAL_MINIMUM (-127)
-  LOGICAL_MAXIMUM(1),  0x7f, //     LOGICAL_MAXIMUM (127)
-  REPORT_SIZE(1),      0x08, //     REPORT_SIZE (8)
-  REPORT_COUNT(1),     0x03, //     REPORT_COUNT (3)
-  HIDINPUT(1),         0x06, //     INPUT (Data, Variable, Relative) ;3 bytes (X,Y,Wheel)
-  // ------------------------------------------------- Horizontal wheel
-  USAGE_PAGE(1),       0x0c, //     USAGE PAGE (Consumer Devices)
-  USAGE(2),      0x38, 0x02, //     USAGE (AC Pan)
-  LOGICAL_MINIMUM(1),  0x81, //     LOGICAL_MINIMUM (-127)
-  LOGICAL_MAXIMUM(1),  0x7f, //     LOGICAL_MAXIMUM (127)
-  REPORT_SIZE(1),      0x08, //     REPORT_SIZE (8)
-  REPORT_COUNT(1),     0x01, //     REPORT_COUNT (1)
-  HIDINPUT(1),         0x06, //     INPUT (Data, Var, Rel)
-  END_COLLECTION(0),         //   END_COLLECTION
-  END_COLLECTION(0)          // END_COLLECTION
+    USAGE_PAGE(1),      0x01,         // Generic Desktop
+    USAGE(1),           0x02,         // Mouse
+    COLLECTION(1),      0x01,         // Application
+    USAGE(1),           0x01,         //  Pointer
+    COLLECTION(1),      0x00,         //  Physical
+    USAGE_PAGE(1),      0x09,         //   Buttons
+    USAGE_MINIMUM(1),   0x01,
+    USAGE_MAXIMUM(1),   0x03,
+    LOGICAL_MINIMUM(1), 0x00,
+    LOGICAL_MAXIMUM(1), 0x01,
+    REPORT_COUNT(1),    0x03,         //   3 bits (Buttons)
+    REPORT_SIZE(1),     0x01,
+    HIDINPUT(1),           0x02,         //   Data, Variable, Absolute
+    REPORT_COUNT(1),    0x01,         //   5 bits (Padding)
+    REPORT_SIZE(1),     0x05,
+    HIDINPUT(1),           0x01,         //   Constant
+    USAGE_PAGE(1),      0x01,         //   Generic Desktop
+    USAGE(1),           0x30,         //   X
+    //PHYSICAL_MINIMUM(2), 0x00, 0x00,         //  0
+    //PHYSICAL_MAXIMUM(2), 0x80, 0x07,   //  1920
+    //LOGICAL_MINIMUM(2), 0x81, 0x08,    //  -1920
+    //LOGICAL_MAXIMUM(2), 0x80, 0x07,    //  1920
+    USAGE(1),           0x31,         //   Y
+    //PHYSICAL_MINIMUM(2), 0x00, 0x00,         //  0
+    //PHYSICAL_MAXIMUM(2), 0x80, 0x07,   //  1920
+    //LOGICAL_MINIMUM(2), 0x81, 0x08,    //  -1920
+    //LOGICAL_MAXIMUM(2), 0x80, 0x07,    //  1920
+    // USAGE(1),           0x38,         //   Wheel
+    PHYSICAL_MINIMUM(2), 0x00, 0x00,         //  0
+    PHYSICAL_MAXIMUM(2), 0xff, 0x7f,   //  32767
+    LOGICAL_MINIMUM(2), 0x01, 0x80,    //  -32767
+    LOGICAL_MAXIMUM(2), 0xff, 0x7f,    //  32767
+    UNIT(2), 0x00, 0x00,         //  No unit
+    REPORT_SIZE(1),     0x10,         //   Three bytes
+    REPORT_COUNT(1),    0x02,
+    HIDINPUT(1),           0x06,         //   Data, Variable, Relative
+    END_COLLECTION(0),
+    END_COLLECTION(0),
 };
 
-BleMouse::BleMouse(std::string deviceName, std::string deviceManufacturer, uint8_t batteryLevel) : 
+BleMouse::BleMouse(std::string deviceName, std::string deviceManufacturer, uint8_t batteryLevel) :
     _buttons(0),
     hid(0)
 {
@@ -88,16 +87,31 @@ void BleMouse::click(uint8_t b)
   move(0,0,0,0);
 }
 
-void BleMouse::move(signed char x, signed char y, signed char wheel, signed char hWheel)
+//void BleMouse::move(signed char x, signed char y, signed char wheel, signed char hWheel)
+//160=(1080/2)=540, 120=(810/2)=405
+void BleMouse::move(int x, int y, signed char wheel, signed char hWheel)
 {
   if (this->isConnected())
   {
-    uint8_t m[5];
+    //uint8_t m[5];
+    unsigned char m[5];
+    int _x = (int) ((1024l * ((long) x)) / 1080); // if 10000l limit = 5000
+    int _y = (int) ((1024l * ((long) y)) / 1080);
+    //int _x = x;
+    //int _y = y;
+    ESP_LOGI("----------------------------------");
+    ESP_LOGI("POSITION", "x : %d , y : %d", x, y);
+    ESP_LOGI("POSITION", "_x : %d , _y : %d", _x, _y);
+    ESP_LOGI("----------------------------------");
     m[0] = _buttons;
-    m[1] = x;
-    m[2] = y;
-    m[3] = wheel;
-    m[4] = hWheel;
+    m[1] = _x & 0xFF;
+    m[2] = (_x >> 8) & 0xFF;
+    m[3] = _y & 0xFF;
+    m[4] = (_y >> 8) & 0xFF;
+    //m[1] = x;
+    //m[2] = y;
+    //m[3] = wheel;
+    //m[4] = hWheel;
     this->inputMouse->setValue(m, 5);
     this->inputMouse->notify();
   }
@@ -160,8 +174,6 @@ void BleMouse::taskServer(void* pvParameter) {
 
   bleMouseInstance->hid->reportMap((uint8_t*)_hidReportDescriptor, sizeof(_hidReportDescriptor));
   bleMouseInstance->hid->startServices();
-
-  bleMouseInstance->onStarted(pServer);
 
   BLEAdvertising *pAdvertising = pServer->getAdvertising();
   pAdvertising->setAppearance(HID_MOUSE);

@@ -28,7 +28,8 @@ public:
   void begin(void);
   void end(void);
   void click(uint8_t b = MOUSE_LEFT);
-  void move(signed char x, signed char y, signed char wheel = 0, signed char hWheel = 0);
+  //void move(signed char x, signed char y, signed char wheel = 0, signed char hWheel = 0);
+  void move(int x, int y, signed char wheel = 0, signed char hWheel = 0);
   void press(uint8_t b = MOUSE_LEFT);   // press LEFT by default
   void release(uint8_t b = MOUSE_LEFT); // release LEFT by default
   bool isPressed(uint8_t b = MOUSE_LEFT); // check LEFT by default
@@ -37,8 +38,6 @@ public:
   uint8_t batteryLevel;
   std::string deviceManufacturer;
   std::string deviceName;
-protected:
-  virtual void onStarted(BLEServer *pServer) { };
 };
 
 #endif // CONFIG_BT_ENABLED
