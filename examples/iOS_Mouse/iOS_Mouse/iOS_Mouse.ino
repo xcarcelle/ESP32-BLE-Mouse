@@ -95,17 +95,17 @@ const uint8_t reportMapMouse[] = {
 0x05, 0x01,        //     Usage Page (Generic Desktop Ctrls)
 0x09, 0x30,        //     Usage (X)
 0x16, 0xC8, 0xFB,  //     Logical Minimum (-1080)
+0x26, 0x01, 0x08,  //     Logical Maximum (2160)
 0x36, 0x00, 0x00,  //     Physical Minimum (0)
-0x26, 0x38, 0x04,  //     Logical Maximum (1080)
-0x46, 0x38, 0x04,  //     Physical Maximum (1080)
+0x46, 0x70, 0x08,  //     Physical Maximum (2160)
 0x09, 0x31,        //     Usage (Y)   
 0x16, 0x80, 0xF8,  //     Logical Minimum (-1920)
+0x26, 0x00, 0x0F,  //     Logical Maximum (3840)
 0x36, 0x00, 0x00,  //     Physical Minimum (0)
-0x26, 0x80, 0x07,  //     Logical Maximum (1920)
-0x46, 0x80, 0x07,  //     Physical Maximum (1920)
+0x46, 0x00, 0x0F,  //     Physical Maximum (3840)
 0x75, 0x10,        //     Report Size (16)
 0x95, 0x02,        //     Report Count (2)
-0x81, 0x06,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+0x81, 0x66,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
 0xC0,              //   End Collection
 0xC0,              // End Collection
 };
@@ -150,96 +150,102 @@ void loop() {
         y = -4000;
         moveTo(x, y);
         delay(1000);
+
         
-        Serial.println("go to 5,0");
-        x = 5;
-        y = 0;
-        moveTo(x, y);
-        delay(1000);
-        
-        Serial.println("go to 5,5");
-        x = 0;
-        y = 5;
+        Serial.println("go to 50,50");
+        x = 50;
+        y = 50;
         moveTo(x, y);
         delay(1000);
 
-        Serial.println("go to 10,5");
-        x = 5;
-        y = 0;
-        moveTo(x, y);
-        delay(1000);
-
-        Serial.println("go to 10,10");
-        x = 0;
-        y = 5;
-        moveTo(x, y);
-        delay(1000);
-
-        Serial.println("go to 15,10");
-        x = 5;
-        y = 0;
-        moveTo(x, y);
-        delay(1000);
-
-        Serial.println("go to 15,15");
-        x = 0;
-        y = 5;
-        moveTo(x, y);
-        delay(1000);
-        
-        Serial.println("go to 25,15");
-        x = 10;
-        y = 0;
-        moveTo(x, y);
-        delay(1000);
-
-        Serial.println("go to 25,25");
-        x = 0;
-        y = 10;
-        moveTo(x, y);
-        delay(1000);
-        
-        Serial.println("go to 45,25");
-        x = 20;
-        y = 0;
-        moveTo(x, y);
-        delay(1000);
-
-        Serial.println("go to 45,45");
-        x = 0;
-        y = 20;
-        moveTo(x, y);
-        delay(1000);
-
-        Serial.println("go to 100,45");
-        x = 55;
-        y = 0;
+        Serial.println("go to origin");
+        x = -4000;
+        y = -4000;
         moveTo(x, y);
         delay(1000);
 
         
         Serial.println("go to 100,100");
-        x = 0;
-        y = 55;
-        moveTo(x, y);
-        delay(1000);
-
-       
-        Serial.println("go to 150,150");
-        x = 50;
-        y = 50;
-        moveTo(x, y);
-        delay(1000);
-
-        Serial.println("go to 200,200");
-        x = 50;
-        y = 50;
-        moveTo(x, y);
-        delay(1000);
-        
-        Serial.println("go to 300,300");
         x = 100;
         y = 100;
+        moveTo(x, y);
+        delay(1000);
+
+        Serial.println("go to origin");
+        x = -4000;
+        y = -4000;
+        moveTo(x, y);
+        delay(1000);
+
+        
+        Serial.println("go to 90,110");
+        x = 90;
+        y = 110;
+        moveTo(x, y);
+        delay(1000);
+
+        Serial.println("go to origin");
+        x = -4000;
+        y = -4000;
+        moveTo(x, y);
+        delay(1000);
+
+        
+        Serial.println("go to 95,120");
+        x = 95;
+        y = 120;
+        moveTo(x, y);
+        delay(1000);
+
+        Serial.println("go to origin");
+        x = -4000;
+        y = -4000;
+        moveTo(x, y);
+        delay(1000);
+
+        
+        Serial.println("go to 95,150");
+        x = 95;
+        y = 150;
+        moveTo(x, y);
+        delay(1000);
+
+        Serial.println("go to origin");
+        x = -4000;
+        y = -4000;
+        moveTo(x, y);
+        delay(1000);
+
+        
+        Serial.println("go to 95,180");
+        x = 95;
+        y = 180;
+        moveTo(x, y);
+        delay(1000);
+
+        Serial.println("go to origin");
+        x = -4000;
+        y = -4000;
+        moveTo(x, y);
+        delay(1000);
+
+        
+        Serial.println("go to 95,200");
+        x = 95;
+        y = 200;
+        moveTo(x, y);
+        delay(1000);
+
+        Serial.println("go to origin");
+        x = -4000;
+        y = -4000;
+        moveTo(x, y);
+        delay(1000);
+
+        
+        Serial.println("go to 95,250");
+        x = 95;
+        y = 250;
         moveTo(x, y);
         delay(1000);
     }
