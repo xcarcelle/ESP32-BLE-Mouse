@@ -37,7 +37,7 @@ void taskServer(void*){
     pServer->setCallbacks(new MyCallbacks());
 
     hid = new BLEHIDDevice(pServer);
-    inputMouse = hid->inputReport(4); // <-- input REPORTID from report map
+    inputMouse = hid->inputReport(5); // <-- input REPORTID from report map
 
     std::string name = "Neshius Industries Corp.";
     hid->manufacturer()->setValue(name);
@@ -79,9 +79,12 @@ const uint8_t reportMapMouse[] = {
 0x05, 0x0D,        // Usage Page (Digitizer)
 0x09, 0x02,        // Usage (Pen)
 0xA1, 0x01,        // Collection (Application)
-0x85, 0x04,        //   Report ID (4)
+0x85, 0x05,        //   Report ID (4)
 0x05, 0x0D,        //   Usage Page (Digitizer)
 0x09, 0x01,        //   Usage (Digitizer)
+0x09, 0x3f,        // USAGE (Azimuth[Orientation])
+0x09, 0x48,        // USAGE (Width)
+0x09, 0x49,        // USAGE (Height)  
 0xA1, 0x00,        //   Collection (Physical)
 0x09, 0x42,        //     Usage (Tip Switch)
 0x09, 0x32,        //     Usage (In Range)
@@ -94,16 +97,20 @@ const uint8_t reportMapMouse[] = {
 0x95, 0x01,        //     Report Count (1)
 0x81, 0x01,        //     Input (Const,Array,Abs,No Wrap,Linear,Preferred State,No Null Position)
 0x05, 0x01,        //     Usage Page (Generic Desktop Ctrls)
+//0x16, 0x00, 0x00,  //     Logical Minimum (0)
+0x36, 0x00, 0x00,  //     Physical Minimum (0)
+// 0x26, 0x80, 0x07,  //     Logical Maximum (1920)
+// 0x46, 0x80, 0x07,  //     Physical Maximum (1920)
+0x26, 0x38, 0x04,  //     Logical Maximum (1080)
+0x46, 0x38, 0x04,  //     Physical Maximum (-1)
 0x09, 0x30,        //     Usage (X)
 0x16, 0x00, 0x00,  //     Logical Minimum (0)
 0x36, 0x00, 0x00,  //     Physical Minimum (0)
+// 0x26, 0x38, 0x04,  //     Logical Maximum (1080)
+// 0x46, 0x38, 0x04,  //     Physical Maximum (1080)
 0x26, 0x80, 0x07,  //     Logical Maximum (1920)
-0x46, 0x80, 0x07,  //     Physical Maximum (1920)
+0x46, 0x80, 0x07,  //     Physical Maximum (-1)
 0x09, 0x31,        //     Usage (Y)
-0x16, 0x00, 0x00,  //     Logical Minimum (0)
-0x36, 0x00, 0x00,  //     Physical Minimum (0)
-0x26, 0x38, 0x04,  //     Logical Maximum (1080)
-0x46, 0x38, 0x04,  //     Physical Maximum (1080)
 0x75, 0x10,        //     Report Size (16)
 0x95, 0x02,        //     Report Count (2)
 0x81, 0x02,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
@@ -112,6 +119,8 @@ const uint8_t reportMapMouse[] = {
 
 // 72 bytes
 };
+
+
 
     hid->reportMap((uint8_t*)reportMapMouse, sizeof(reportMapMouse));
     hid->startServices();
@@ -139,7 +148,20 @@ void setup() {
 }
 
 void moveTo(uint16_t x, uint16_t y) {
-  unsigned char buffer[] = {4, x & 0x00FF, (x & 0xFF00) >> 8, y & 0x00FF, (y & 0xFF00) >> 8};
+  //unsigned char buffer[] = {5, 1, x & 0x00FF, (x & 0xFF00) >> 8, y & 0x00FF, (y & 0xFF00) >> 8};
+  unsigned char buffer[] = {5, 1, 5, 80, 0, 10};
+  Serial.print("x : ");Serial.print(buffer[2]);Serial.print(" ");Serial.println(buffer[3]);
+  Serial.print("y : ");Serial.print(buffer[4]);Serial.print(" ");Serial.println(buffer[5]);
+  //Serial.print("values : ");Serial.print(y & 0x00FF);Serial.println((y & 0xFF00) >> 8);
+
+
+ 
+  inputMouse->setValue(buffer,sizeof(buffer));
+  inputMouse->notify();
+}
+
+void reset() {
+  unsigned char buffer[] = {5, 1, 0, 0, 0, 0};
  
   inputMouse->setValue(buffer,sizeof(buffer));
   inputMouse->notify();
@@ -156,21 +178,22 @@ void loop() {
         Serial.println("go to 1,1");
         x = 1;
         y = 1;
-        moveTo(x, y);
+        reset();
         delay(1000);
         
         Serial.println("go to 2,2");
-        x = 2;
-        y = 2;
+        x = 4;
+        y = 4;
         moveTo(x, y);
         delay(1000);
 
         Serial.println("go to 50,50");
         x = 50;
         y = 50;
-        moveTo(x, y);
+        reset();
         delay(1000);
 
+        /*
         Serial.println("go to 100,100");
         x = 100;
         y = 100;
@@ -221,8 +244,8 @@ void loop() {
 
         
         Serial.println("go to 1050,1050");
-        x = 1050;
-        y = 1050;
+        x = 1900;
+        y = 1000;
         moveTo(x, y);
         delay(1000);
 
@@ -242,7 +265,7 @@ void loop() {
         x = 1079;
         y = 1079;
         moveTo(x, y);
-        delay(1000);
+        delay(1000);*/
     }
   delay(50);
 }
