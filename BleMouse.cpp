@@ -19,45 +19,73 @@
   static const char* LOG_TAG = "BLEDevice";
 #endif
 
+#define CONTACT_COUNT_MAXIMUM 10
+#define REPORTID_TOUCH        0x04
+
+#define LSB(v) ((v >> 8) & 0xff)
+#define MSB(v) (v & 0xff)
+
 static const uint8_t _hidReportDescriptor[] = {
-    USAGE_PAGE(1),      0x01,         // Generic Desktop
-    USAGE(1),           0x02,         // Mouse
-    COLLECTION(1),      0x01,         // Application
-    USAGE(1),           0x01,         //  Pointer
-    COLLECTION(1),      0x00,         //  Physical
-    USAGE_PAGE(1),      0x09,         //   Buttons
-    USAGE_MINIMUM(1),   0x01,
-    USAGE_MAXIMUM(1),   0x03,
-    LOGICAL_MINIMUM(1), 0x00,
-    LOGICAL_MAXIMUM(1), 0x01,
-    REPORT_COUNT(1),    0x03,         //   3 bits (Buttons)
-    REPORT_SIZE(1),     0x01,
-    HIDINPUT(1),           0x02,         //   Data, Variable, Absolute
-    REPORT_COUNT(1),    0x01,         //   5 bits (Padding)
-    REPORT_SIZE(1),     0x05,
-    HIDINPUT(1),           0x01,         //   Constant
-    USAGE_PAGE(1),      0x01,         //   Generic Desktop
-    USAGE(1),           0x30,         //   X
-    //PHYSICAL_MINIMUM(2), 0x00, 0x00,         //  0
-    //PHYSICAL_MAXIMUM(2), 0x80, 0x07,   //  1920
-    //LOGICAL_MINIMUM(2), 0x81, 0x08,    //  -1920
-    //LOGICAL_MAXIMUM(2), 0x80, 0x07,    //  1920
-    USAGE(1),           0x31,         //   Y
-    //PHYSICAL_MINIMUM(2), 0x00, 0x00,         //  0
-    //PHYSICAL_MAXIMUM(2), 0x80, 0x07,   //  1920
-    //LOGICAL_MINIMUM(2), 0x81, 0x08,    //  -1920
-    //LOGICAL_MAXIMUM(2), 0x80, 0x07,    //  1920
-    // USAGE(1),           0x38,         //   Wheel
-    PHYSICAL_MINIMUM(2), 0x00, 0x00,         //  0
-    PHYSICAL_MAXIMUM(2), 0xff, 0x7f,   //  32767
-    LOGICAL_MINIMUM(2), 0x01, 0x80,    //  -32767
-    LOGICAL_MAXIMUM(2), 0xff, 0x7f,    //  32767
-    UNIT(2), 0x00, 0x00,         //  No unit
-    REPORT_SIZE(1),     0x10,         //   Three bytes
-    REPORT_COUNT(1),    0x02,
-    HIDINPUT(1),           0x06,         //   Data, Variable, Relative
-    END_COLLECTION(0),
-    END_COLLECTION(0),
+  0x05, 0x0D,                    // USAGE_PAGE(Digitizers)
+  0x09, 0x04,                    // USAGE     (Touch Screen)
+  0xA1, 0x01,                    // COLLECTION(Application)
+  0x85, REPORTID_TOUCH,          //   REPORT_ID (Touch)
+
+  // define the maximum amount of fingers that the device supports
+  0x09, 0x55,                    //   USAGE (Contact Count Maximum)
+  0x25, CONTACT_COUNT_MAXIMUM,   //   LOGICAL_MAXIMUM (CONTACT_COUNT_MAXIMUM)
+  0xB1, 0x02,                    //   FEATURE (Data,Var,Abs)
+
+  // define the actual amount of fingers that are concurrently touching the screen
+  0x09, 0x54,                    //   USAGE (Contact count)
+  0x95, 0x01,                    //   REPORT_COUNT(1)
+  0x75, 0x08,                    //   REPORT_SIZE (8)
+  0x81, 0x02,                    //   INPUT (Data,Var,Abs)
+
+  // declare a finger collection
+  0x09, 0x22,                    //   USAGE (Finger)
+  0xA1, 0x02,                    //   COLLECTION (Logical)
+
+  // declare an identifier for the finger
+  0x09, 0x51,                    //     USAGE (Contact Identifier)
+  0x75, 0x08,                    //     REPORT_SIZE (8)
+  0x95, 0x01,                    //     REPORT_COUNT (1)
+  0x81, 0x02,                    //     INPUT (Data,Var,Abs)
+
+  // declare Tip Switch and In Range
+  0x09, 0x42,                    //     USAGE (Tip Switch)
+  0x09, 0x32,                    //     USAGE (In Range)
+  0x15, 0x00,                    //     LOGICAL_MINIMUM (0)
+  0x25, 0x01,                    //     LOGICAL_MAXIMUM (1)
+  0x75, 0x01,                    //     REPORT_SIZE (1)
+  0x95, 0x02,                    //     REPORT_COUNT(2)
+  0x81, 0x02,                    //     INPUT (Data,Var,Abs)
+
+  // declare the remaining 6 bits of the first data byte as constant -> the driver will ignore them
+  0x95, 0x06,                    //     REPORT_COUNT (6)
+  0x81, 0x03,                    //     INPUT (Cnst,Ary,Abs)
+
+  // define absolute X and Y coordinates of 16 bit each (percent values multiplied with 100)
+  0x05, 0x01,                    //     USAGE_PAGE (Generic Desktop)
+  0x09, 0x30,                    //     Usage (X)
+  0x09, 0x31,                    //     Usage (Y)
+  0x16, 0x00, 0x00,              //     Logical Minimum (0)
+  0x26, 0x10, 0x27,              //     Logical Maximum (10000)
+  0x36, 0x00, 0x00,              //     Physical Minimum (0)
+  0x46, 0x10, 0x27,              //     Physical Maximum (10000)
+  0x66, 0x00, 0x00,              //     UNIT (None)
+  0x75, 0x10,                    //     Report Size (16),
+  0x95, 0x02,                    //     Report Count (2),
+  0x81, 0x02,                    //     Input (Data,Var,Abs)
+  0xC0,                          //   END_COLLECTION
+  0xC0                           // END_COLLECTION
+
+  // with this declaration a data packet must be sent as:
+  // byte 1   -> "contact count"        (always == 1)
+  // byte 2   -> "contact identifier"   (any value)
+  // byte 3   -> "Tip Switch" state     (bit 0 = Tip Switch up/down, bit 1 = In Range)
+  // byte 4,5 -> absolute X coordinate  (0...10000)
+  // byte 6,7 -> absolute Y coordinate  (0...10000)
 };
 
 BleMouse::BleMouse(std::string deviceName, std::string deviceManufacturer, uint8_t batteryLevel) :
@@ -87,6 +115,7 @@ void BleMouse::click(uint8_t b)
   move(0,0,0,0);
 }
 
+//void Touch_::send(uint8_t identifier, uint8_t touch, int16_t x, int16_t y) {
 //void BleMouse::move(signed char x, signed char y, signed char wheel, signed char hWheel)
 //160=(1080/2)=540, 120=(810/2)=405
 void BleMouse::move(int x, int y, signed char wheel, signed char hWheel)
